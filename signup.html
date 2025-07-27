@@ -6,6 +6,7 @@
     <title>El rincon mágico-Crear cuenta</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- La librería de Supabase se carga aquí para que esté disponible -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         body {
@@ -99,7 +100,7 @@
     </header>
 
     <main class="flex-grow flex flex-col items-center justify-center p-4">
-        <h1 class="text-3xl md:text-4xl font-semibold text-gray-800 mb-8 mt-4">Registrate</h1>
+        <h1 class="text-3xl md:text-4xl font-semibold text-gray-800 mb-8 mt-4">Regístrate</h1>
 
         <div class="bg-white rounded-2xl shadow-lg flex flex-col lg:flex-row max-w-5xl w-full overflow-hidden">
             <div class="lg:w-1/2 p-8 flex items-center justify-center bg-white">
@@ -113,11 +114,11 @@
                 <h2 class="text-2xl md:text-3xl font-semibold text-gray-800 mb-6">Bienvenido de vuelta. Por favor, crea una cuenta para continuar.</h2>
                 
                 <div class="mb-4">
-                    <input type="email" placeholder="tucorreo@gmail.com" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500">
+                    <input type="email" id="email" placeholder="tucorreo@gmail.com" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500">
                 </div>
 
                 <div class="mb-6">
-                    <input type="password" placeholder="tu contraseña..." class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500" >
+                    <input type="password" id="password" placeholder="tu contraseña..." class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500" >
                 </div>
 
                 <div class="flex justify-between items-center mb-8">
@@ -129,12 +130,82 @@
                     </label>
                 </div>
 
+                <!-- Div para mostrar mensajes al usuario -->
+                <div id="message" class="mb-4 text-center text-sm font-medium"></div>
+
                 <div class="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
-                    <button class="bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 px-6 rounded-lg shadow-md flex-grow transition duration-300 ease-in-out">Registrarse</button>
-                    <a href="sigin.html" class="flex-grow text-center bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold py-3 px-6 rounded-lg shadow-md transition duration-300 ease-in-out">ir a iniciar sesión</a>
+                    <button id="signupButton" class="bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 px-6 rounded-lg shadow-md flex-grow transition duration-300 ease-in-out">Registrarse</button>
+                    <a href="sigin.html" class="flex-grow text-center bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold py-3 px-6 rounded-lg shadow-md transition duration-300 ease-in-out">Ir a iniciar sesión</a>
                 </div>
             </div>
         </div>
     </main>
+
+    <!-- ¡IMPORTANTE! El script personalizado se coloca aquí, justo antes de cerrar </body> -->
+    <script>
+        // Inicializa el cliente de Supabase
+        const SUPABASE_URL = 'https://bzeoxurommikbjbbbcfl.supabase.co'; 
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ6ZW94dXJvbW1pa2JqYmJiY2ZsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTM1ODYwNTUsImV4cCI6MjA2OTE2MjA1NX0.19Xh5DJh49bvODOKVDBMgFBfJ1g9KIwE00BP_j7Y9VQ';
+        
+        // Asegúrate de que el objeto Supabase esté disponible antes de intentar usarlo
+        const { createClient } = supabase;
+const client = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+// Obtener elementos del DOM
+const emailInput = document.getElementById('email');
+const passwordInput = document.getElementById('password');
+const signupButton = document.getElementById('signupButton');
+const messageDiv = document.getElementById('message');
+
+// Función para mostrar mensajes
+function displayMessage(text, type) {
+    messageDiv.textContent = text;
+    if (type === 'success') {
+        messageDiv.className = 'mb-4 text-center text-sm font-medium text-green-600';
+    } else if (type === 'error') {
+        messageDiv.className = 'mb-4 text-center text-sm font-medium text-red-600';
+    } else {
+        messageDiv.className = 'mb-4 text-center text-sm font-medium text-gray-700';
+    }
+}
+
+// Evento para registrarse
+signupButton.addEventListener('click', async (event) => {
+    event.preventDefault();
+
+    const email = emailInput.value;
+    const password = passwordInput.value;
+
+    if (!email || !password) {
+        displayMessage('Por favor, ingresa tu correo y contraseña.', 'error');
+        return;
+    }
+
+    displayMessage('Registrando usuario...', 'info');
+    signupButton.disabled = true;
+
+    try {
+        const { data, error } = await client.auth.signUp({
+            email: email,
+            password: password,
+        });
+
+        if (error) {
+            if (error.message.includes('User already registered')) {
+                displayMessage('Este correo ya está registrado.', 'error');
+            } else {
+                displayMessage(`Error: ${error.message}`, 'error');
+            }
+        } else {
+            displayMessage('¡Registro exitoso! Revisa tu correo.', 'success');
+            setTimeout(() => window.location.href = 'sigin.html', 3000);
+        }
+    } catch (err) {
+        displayMessage(`Error inesperado: ${err.message}`, 'error');
+    } finally {
+        signupButton.disabled = false;
+    }
+});
+    </script>
 </body>
 </html>
