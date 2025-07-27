@@ -353,7 +353,7 @@ sendResetBtn.addEventListener('click', async () => {
 
   try {
     const { data, error } = await client.auth.resetPasswordForEmail(email, {
-      redirectTo: 'http://127.0.0.1:3000/resetpassword.html' // cámbialo por tu URL real
+      redirectTo: 'https://el-rincon-magico.vercel.app/resetpassword.html' // cámbialo por tu URL real
     });
 
     if (error) {
