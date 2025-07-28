@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Pedidos - El Rincón Mágico</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+</head>
+<body class="bg-gray-100 text-gray-800">
+
+  <div class="max-w-6xl mx-auto p-6">
+    <h1 class="text-3xl font-bold mb-6 text-center">Pedidos recibidos</h1>
+
+    <div class="overflow-x-auto">
+      <table class="min-w-full bg-white shadow rounded-lg">
+        <thead class="bg-gray-200">
+          <tr>
+            <th class="py-3 px-4 text-left">Correo</th>
+            <th class="py-3 px-4 text-left">Dirección</th>
+            <th class="py-3 px-4 text-left">Artículos</th>
+            <th class="py-3 px-4 text-left">Total</th>
+            <th class="py-3 px-4 text-left">Estado</th>
+            <th class="py-3 px-4 text-left">Cambiar estado</th>
+          </tr>
+        </thead>
+        <tbody id="tabla-pedidos" class="divide-y divide-gray-200"></tbody>
+      </table>
+    </div>
+  </div>
+  <div class="mt-6 text-center">
+  <a href="manage.html" class="inline-block px-6 py-3 bg-orange-500 text-white font-semibold rounded hover:bg-orange-700 transition">
+    ← Volver a productos
+  </a>
+</div>
+
+
+  <script>
+    const supabase = window.supabase.createClient(
+      "https://bzeoxurommikbjbbbcfl.supabase.co",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ6ZW94dXJvbW1pa2JqYmJiY2ZsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTM1ODYwNTUsImV4cCI6MjA2OTE2MjA1NX0.19Xh5DJh49bvODOKVDBMgFBfJ1g9KIwE00BP_j7Y9VQ"
+    );
+
+    async function cargarPedidos() {
+  const { data: pedidos, error } = await supabase
+    .from("pedidos")
+    .select("id, total, direccion, estado, fecha, correo");
+
+  if (error) {
+    console.error("Error cargando pedidos:", error);
+    return;
+  }
+
+  const tabla = document.getElementById("tabla-pedidos");
+  tabla.innerHTML = "";
+
+  for (const pedido of pedidos) {
+    // Obtener productos del pedido
+    const { data: items, error: itemsError } = await supabase
+      .from("pedido_items")
+      .select("producto_id, cantidad")
+      .eq("pedido_id", pedido.id);
+
+    let resumen = "Sin productos";
+    if (items && items.length > 0) {
+      const idsProductos = items.map(i => i.producto_id);
+      const { data: productos, error: prodError } = await supabase
+        .from("productos")
+        .select("id, name")
+        .in("id", idsProductos);
+
+      if (!prodError) {
+        resumen = items.map(item => {
+          const nombre = productos.find(p => p.id === item.producto_id)?.name || "Desconocido";
+          return `${nombre} x${item.cantidad}`;
+        }).join(", ");
+      }
+    }
+
+    const colorEstado = {
+      pendiente: "bg-orange-500",
+      cancelado: "bg-red-500",
+      "en camino": "bg-green-500",
+      entregado: "bg-emerald-600",
+    }[pedido.estado] || "bg-gray-400";
+
+    const fila = document.createElement("tr");
+    fila.innerHTML = `
+      <td class="px-4 py-3">${pedido.correo || "Desconocido"}</td>
+      <td class="px-4 py-3">${pedido.direccion}</td>
+      <td class="px-4 py-3 text-sm text-gray-700">${resumen}</td>
+      <td class="px-4 py-3 font-semibold">$${pedido.total.toLocaleString()}</td>
+      <td class="px-4 py-3">
+        <span class="inline-block w-4 h-4 rounded-full ${colorEstado}"></span>
+        <span class="ml-2 capitalize">${pedido.estado}</span>
+      </td>
+      <td class="px-4 py-3">
+        <select onchange="cambiarEstado(${pedido.id}, this.value)" class="border rounded px-2 py-1">
+          <option value="pendiente" ${pedido.estado === "pendiente" ? "selected" : ""}>Pendiente</option>
+          <option value="en camino" ${pedido.estado === "en camino" ? "selected" : ""}>En camino</option>
+          <option value="entregado" ${pedido.estado === "entregado" ? "selected" : ""}>Entregado</option>
+          <option value="cancelado" ${pedido.estado === "cancelado" ? "selected" : ""}>Cancelado</option>
+        </select>
+      </td>
+    `;
+
+    tabla.appendChild(fila);
+  }
+}
+
+
+
+    async function cambiarEstado(pedidoId, nuevoEstado) {
+      const { error } = await supabase
+        .from("pedidos")
+        .update({ estado: nuevoEstado })
+        .eq("id", pedidoId);
+
+      if (error) {
+        alert(" Error actualizando el estado");
+        console.error(error);
+      } else {
+        cargarPedidos();
+      }
+    }
+
+    cargarPedidos();
+  </script>
+</body>
+</html>

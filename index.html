@@ -232,7 +232,7 @@
   async function cargarProductos() {
   const { data: productos, error } = await supabase
     .from('productos')
-    .select('name, price, description, category, imagen');
+    .select('id, name, price, description, category, imagen')
 
   if (error) {
     console.error('Error al obtener productos:', error.message);

@@ -1,10 +1,11 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Carrito - El Rincón Mágico</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
 </head>
 <body class="bg-gray-100 text-gray-800">
 
@@ -13,23 +14,38 @@
 
     <div id="carrito-contenedor" class="space-y-4"></div>
 
-    <div class="mt-8 text-right">
-      <p class="text-xl font-semibold">Total: <span id="total" class="text-orange-600">$0</span></p>
-      <a href="index.html" class="mt-4 inline-block bg-orange-500 hover:bg-orange-600 text-white px-6 py-2 rounded transition">
-        ← Volver a la tienda
-      </a>
+    <div class="mt-8 text-right space-y-4">
+      <p class="text-xl font-semibold">Total productos: <span id="total-sin-envio" class="text-gray-800">$0</span></p>
+      <p class="text-xl font-semibold">Envío: <span class="text-gray-800">$2.000</span></p>
+      <p class="text-2xl font-bold">Total a pagar: <span id="total" class="text-orange-600">$0</span></p>
+
+      <div class="mt-4 flex justify-end space-x-4">
+  <button id="hacer-pedido" class="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded transition">
+    Hacer pedido
+  </button>
+  <a href="index.html" class="bg-orange-500 hover:bg-orange-600 text-white px-6 py-2 rounded transition">
+    ← Volver a la tienda
+  </a>
+</div>
+
     </div>
   </div>
 
-  <!-- Toast de notificación para eliminaciones -->
-  <div id="toast" class="fixed bottom-4 right-4 bg-red-500 text-white px-4 py-2 rounded-lg shadow-lg opacity-0 pointer-events-none transition-opacity duration-300 z-50">
-    Producto eliminado
-  </div>
+  <!-- Toast genérico -->
+<div id="toast" class="fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-green-600 text-white px-6 py-3 rounded-xl shadow-lg opacity-0 pointer-events-none transition duration-300 z-50 text-sm font-medium">
+  Notificación
+</div>
+
 
   <script>
+    const SUPABASE_URL = 'https://bzeoxurommikbjbbbcfl.supabase.co';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ6ZW94dXJvbW1pa2JqYmJiY2ZsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTM1ODYwNTUsImV4cCI6MjA2OTE2MjA1NX0.19Xh5DJh49bvODOKVDBMgFBfJ1g9KIwE00BP_j7Y9VQ';
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
     function cargarCarrito() {
       const contenedor = document.getElementById('carrito-contenedor');
       const totalSpan = document.getElementById('total');
+      const totalSinEnvioSpan = document.getElementById('total-sin-envio');
       const carrito = JSON.parse(localStorage.getItem('carrito')) || [];
 
       contenedor.innerHTML = '';
@@ -37,6 +53,8 @@
       if (carrito.length === 0) {
         contenedor.innerHTML = '<p class="text-center text-gray-500">Tu carrito está vacío.</p>';
         totalSpan.textContent = '$0';
+        totalSinEnvioSpan.textContent = '$0';
+        document.getElementById("hacer-pedido").disabled = true;
         return;
       }
 
@@ -62,15 +80,16 @@
         const eliminarBtn = document.createElement('button');
         eliminarBtn.textContent = 'Eliminar';
         eliminarBtn.className = 'bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition';
-        eliminarBtn.addEventListener('click', () => {
-          eliminarProducto(index);
-        });
+        eliminarBtn.addEventListener('click', () => eliminarProducto(index));
 
         card.appendChild(eliminarBtn);
         contenedor.appendChild(card);
       });
 
-      totalSpan.textContent = `$${total.toLocaleString()}`;
+      const totalConEnvio = total + 2000;
+
+      totalSinEnvioSpan.textContent = `$${total.toLocaleString()}`;
+      totalSpan.textContent = `$${totalConEnvio.toLocaleString()}`;
     }
 
     function eliminarProducto(index) {
@@ -93,9 +112,96 @@
       }, 2500);
     }
 
-    // Cargar carrito al abrir la página
-    cargarCarrito();
-  </script>
+    document.getElementById("hacer-pedido").addEventListener("click", async () => {
+  const carrito = JSON.parse(localStorage.getItem("carrito")) || [];
+  if (carrito.length === 0) {
+    mostrarToast("Tu carrito está vacío", "red");
+    return;
+  }
 
-</body>
+  let total = carrito.reduce((acc, item) => acc + (item.price * item.cantidad), 0);
+  total += 2000;
+
+  const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+  if (sessionError || !session?.user) {
+    mostrarToast("Debes iniciar sesión para hacer el pedido", "red");
+    return;
+  }
+
+  const usuario_id = session.user.id;
+  const correo = session.user.email;
+  const direccion = session.user.user_metadata?.address || "Sin dirección";
+
+
+  // 1. Insertar el pedido
+  const { data: pedidoData, error: pedidoError } = await supabase
+    .from("pedidos")
+    .insert([
+      {
+        usuario_id,
+        correo,
+        total,
+        estado: "pendiente",
+        direccion,
+        fecha: new Date()
+      }
+    ])
+    .select(); // <-- Necesario para obtener el ID
+
+  if (pedidoError || !pedidoData || !pedidoData[0]) {
+    mostrarToast("Error al crear el pedido", "red");
+    console.error(pedidoError);
+    return;
+  }
+
+  const pedido_id = pedidoData[0].id;
+
+  // 2. Insertar los ítems del pedido
+  const items = carrito.map(item => ({
+    pedido_id,
+    producto_id: item.producto_id || item.id,
+    cantidad: item.cantidad,
+    precio_unitario: item.price
+  }));
+
+  const { error: itemsError } = await supabase
+    .from("pedido_items")
+    .insert(items);
+
+  if (itemsError) {
+    mostrarToast("Error al guardar productos del pedido", "red");
+    console.error(itemsError);
+    return;
+  }
+
+  // 3. Todo bien
+  mostrarToast("Pedido realizado correctamente", "green");
+  localStorage.removeItem("carrito");
+  setTimeout(() => window.location.href = "index.html", 2500);
+});
+
+
+
+
+    cargarCarrito();
+    function mostrarToast(mensaje, color = "green") {
+  const toast = document.getElementById("toast");
+  toast.textContent = mensaje;
+
+  // Colores permitidos: green, red, yellow, etc.
+  toast.className = `fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-${color}-600 text-white px-6 py-3 rounded-xl shadow-lg opacity-0 pointer-events-none transition duration-300 z-50 text-sm font-medium`;
+
+  // Mostrar
+  toast.classList.remove("opacity-0");
+  toast.classList.add("opacity-100");
+
+  // Ocultar luego de 2.5s
+  setTimeout(() => {
+    toast.classList.remove("opacity-100");
+    toast.classList.add("opacity-0");
+  }, 2500);
+}
+
+  </script>
+</body> 
 </html>
