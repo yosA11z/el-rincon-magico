@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Carrito - El Rincón Mágico</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 text-gray-800">
+
+  <div class="max-w-4xl mx-auto p-6">
+    <h1 class="text-3xl font-bold mb-6 text-center">Tu Carrito</h1>
+
+    <div id="carrito-contenedor" class="space-y-4"></div>
+
+    <div class="mt-8 text-right">
+      <p class="text-xl font-semibold">Total: <span id="total" class="text-orange-600">$0</span></p>
+      <a href="index.html" class="mt-4 inline-block bg-orange-500 hover:bg-orange-600 text-white px-6 py-2 rounded transition">
+        ← Volver a la tienda
+      </a>
+    </div>
+  </div>
+
+  <!-- Toast de notificación para eliminaciones -->
+  <div id="toast" class="fixed bottom-4 right-4 bg-red-500 text-white px-4 py-2 rounded-lg shadow-lg opacity-0 pointer-events-none transition-opacity duration-300 z-50">
+    Producto eliminado
+  </div>
+
+  <script>
+    function cargarCarrito() {
+      const contenedor = document.getElementById('carrito-contenedor');
+      const totalSpan = document.getElementById('total');
+      const carrito = JSON.parse(localStorage.getItem('carrito')) || [];
+
+      contenedor.innerHTML = '';
+
+      if (carrito.length === 0) {
+        contenedor.innerHTML = '<p class="text-center text-gray-500">Tu carrito está vacío.</p>';
+        totalSpan.textContent = '$0';
+        return;
+      }
+
+      let total = 0;
+
+      carrito.forEach((producto, index) => {
+        const subtotal = producto.price * producto.cantidad;
+        total += subtotal;
+
+        const card = document.createElement('div');
+        card.className = 'bg-white rounded-lg p-4 shadow flex items-center gap-4';
+
+        card.innerHTML = `
+          <img src="${producto.imagen}" alt="${producto.name}" class="w-20 h-20 object-cover rounded">
+          <div class="flex-1">
+            <h3 class="text-lg font-semibold">${producto.name}</h3>
+            <p class="text-sm text-gray-500">Cantidad: ${producto.cantidad}</p>
+            <p class="text-sm">Precio: $${Number(producto.price).toLocaleString()}</p>
+            <p class="text-sm font-bold">Subtotal: $${subtotal.toLocaleString()}</p>
+          </div>
+        `;
+
+        const eliminarBtn = document.createElement('button');
+        eliminarBtn.textContent = 'Eliminar';
+        eliminarBtn.className = 'bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition';
+        eliminarBtn.addEventListener('click', () => {
+          eliminarProducto(index);
+        });
+
+        card.appendChild(eliminarBtn);
+        contenedor.appendChild(card);
+      });
+
+      totalSpan.textContent = `$${total.toLocaleString()}`;
+    }
+
+    function eliminarProducto(index) {
+      let carrito = JSON.parse(localStorage.getItem('carrito')) || [];
+      const eliminado = carrito.splice(index, 1)[0];
+      localStorage.setItem('carrito', JSON.stringify(carrito));
+      mostrarToast(`"${eliminado.name}" eliminado del carrito`);
+      cargarCarrito();
+    }
+
+    function mostrarToast(mensaje) {
+      const toast = document.getElementById('toast');
+      toast.textContent = mensaje;
+      toast.classList.remove('opacity-0');
+      toast.classList.add('opacity-100');
+
+      setTimeout(() => {
+        toast.classList.remove('opacity-100');
+        toast.classList.add('opacity-0');
+      }, 2500);
+    }
+
+    // Cargar carrito al abrir la página
+    cargarCarrito();
+  </script>
+
+</body>
+</html>

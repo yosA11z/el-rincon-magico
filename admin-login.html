@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Panel Admin - Iniciar Sesión</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    body { font-family: 'Inter', sans-serif; background-color: #f8f8f8; }
+    .toggle-switch {
+      position: relative; display: inline-block; width: 40px; height: 20px;
+    }
+    .toggle-switch input {
+      opacity: 0; width: 0; height: 0;
+    }
+    .slider {
+      position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
+      background-color: #ccc; transition: .4s; border-radius: 34px;
+    }
+    .slider:before {
+      position: absolute; content: ""; height: 16px; width: 16px;
+      left: 2px; bottom: 2px; background-color: white; transition: .4s;
+      border-radius: 50%;
+    }
+    input:checked + .slider {
+      background-color: #FF6B00;
+    }
+    input:focus + .slider {
+      box-shadow: 0 0 1px #FF6B00;
+    }
+    input:checked + .slider:before {
+      transform: translateX(20px);
+    }
+    .header-link {
+      position: relative; display: inline-block;
+    }
+    .header-link::after {
+      content: ''; position: absolute; width: 100%; height: 2px;
+      bottom: -5px; left: 0; background-color: #FF6B00;
+      transform: scaleX(0); transition: transform 0.3s ease-out;
+      transform-origin: left;
+    }
+    .header-link:hover::after {
+      transform: scaleX(1);
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+  <header class="bg-white shadow-sm py-4 px-6 md:px-12 flex justify-between items-center">
+    <div class="text-2xl font-bold text-gray-800">Panel de Administración</div>
+    <nav class="hidden md:flex space-x-8 text-gray-600 font-medium">
+      <a href="index.html" class="hover:text-gray-900 header-link">Volver a Tienda</a>
+    </nav>
+  </header>
+
+  <main class="flex-grow flex flex-col items-center justify-center p-4">
+    <h1 class="text-3xl md:text-4xl font-semibold text-gray-800 mb-8 mt-4">Bienvenido administrador, inicia sesión</h1>
+
+    <div class="bg-white rounded-2xl shadow-lg flex flex-col lg:flex-row max-w-4xl w-full overflow-hidden">
+      <div class="lg:w-1/2 p-8 flex items-center justify-center bg-white">
+        <img src="login-img.avif" alt="Admin ilustración" class="max-w-full h-auto rounded-lg"
+          onerror="this.onerror=null;this.src='https://placehold.co/500x400/F8F8F8/333333?text=Admin+Panel';">
+      </div>
+
+      <div class="lg:w-1/2 p-8 md:p-12 flex flex-col justify-center">
+        <form id="adminLoginForm" class="space-y-6">
+          <input type="email" id="email" placeholder="admin@correo.com"
+            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500" required>
+          <input type="password" id="password" placeholder="Contraseña"
+            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500" required>
+
+          <div class="flex justify-between items-center">
+            <label class="flex items-center space-x-2 cursor-pointer">
+              <div class="toggle-switch">
+                <input type="checkbox" id="rememberEmail">
+                <span class="slider"></span>
+              </div>
+              <span class="text-gray-600 text-sm">Recordar correo</span>
+            </label>
+            <a href="#" id="forgotPasswordLink" class="text-red-500 text-sm font-medium hover:underline">¿Olvidaste tu contraseña?</a>
+          </div>
+
+          <div>
+            <button type="submit"
+              class="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 px-6 rounded-lg shadow-md transition duration-300 ease-in-out">
+              Iniciar sesión
+            </button>
+          </div>
+          <div id="message" class="text-center text-sm font-medium mt-2"></div>
+        </form>
+      </div>
+    </div>
+  </main>
+
+  <!-- Modal de recuperación -->
+  <div id="resetModal" class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 hidden">
+    <div class="bg-white p-6 rounded-lg shadow-lg w-80 text-center">
+      <h2 class="text-lg font-semibold mb-2">Restablecer contraseña</h2>
+      <input id="resetEmail" type="email" placeholder="Ingresa tu correo"
+        class="w-full border px-3 py-2 rounded mb-4" />
+      <div class="flex justify-center space-x-2">
+        <button id="sendResetBtn"
+          class="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded">Enviar</button>
+        <button id="cancelResetBtn"
+          class="bg-gray-300 hover:bg-gray-400 text-black px-4 py-2 rounded">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const supabase = window.supabase.createClient(
+      'https://bzeoxurommikbjbbbcfl.supabase.co',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ6ZW94dXJvbW1pa2JqYmJiY2ZsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTM1ODYwNTUsImV4cCI6MjA2OTE2MjA1NX0.19Xh5DJh49bvODOKVDBMgFBfJ1g9KIwE00BP_j7Y9VQ'
+    );
+
+    const ADMIN_EMAIL = "jeferinconmagico@gmail.com";
+
+    const form = document.getElementById('adminLoginForm');
+    const emailInput = document.getElementById('email');
+    const passwordInput = document.getElementById('password');
+    const rememberCheckbox = document.getElementById('rememberEmail');
+    const messageDiv = document.getElementById('message');
+
+    function displayMessage(msg, type = 'info') {
+      messageDiv.textContent = msg;
+      messageDiv.className = 'text-center text-sm font-medium mt-2';
+      if (type === 'success') messageDiv.classList.add('text-green-600');
+      if (type === 'error') messageDiv.classList.add('text-red-600');
+    }
+
+    // Recordar correo
+    document.addEventListener('DOMContentLoaded', () => {
+      const saved = localStorage.getItem('adminEmail');
+      if (saved) {
+        emailInput.value = saved;
+        rememberCheckbox.checked = true;
+      }
+    });
+
+    rememberCheckbox.addEventListener('change', () => {
+      if (rememberCheckbox.checked) {
+        localStorage.setItem('adminEmail', emailInput.value);
+      } else {
+        localStorage.removeItem('adminEmail');
+      }
+    });
+
+    // Iniciar sesión
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = emailInput.value;
+      const password = passwordInput.value;
+
+      if (!email || !password) {
+        return displayMessage('Completa todos los campos', 'error');
+      }
+
+      displayMessage('Verificando credenciales...');
+
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+
+      if (error) {
+        displayMessage(error.message, 'error');
+      } else {
+        if (rememberCheckbox.checked) {
+          localStorage.setItem('adminEmail', email);
+        }
+        displayMessage('Acceso correcto. Redirigiendo...', 'success');
+        setTimeout(() => {
+          window.location.href = 'manage.html'; // Página de panel
+        }, 2000);
+      }
+    });
+
+    // Modal recuperación
+    const forgotPasswordLink = document.getElementById('forgotPasswordLink');
+    const resetModal = document.getElementById('resetModal');
+    const resetEmail = document.getElementById('resetEmail');
+    const sendResetBtn = document.getElementById('sendResetBtn');
+    const cancelResetBtn = document.getElementById('cancelResetBtn');
+
+    forgotPasswordLink.addEventListener('click', (e) => {
+      e.preventDefault();
+      resetEmail.value = emailInput.value;
+      resetModal.classList.remove('hidden');
+    });
+
+    cancelResetBtn.addEventListener('click', () => {
+      resetModal.classList.add('hidden');
+    });
+
+    sendResetBtn.addEventListener('click', async () => {
+      const email = resetEmail.value;
+      if (!email) return displayMessage('Ingresa un correo válido', 'error');
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: 'https://el-rincon-magico.vercel.app/resetpassword.html'
+      });
+      if (error) {
+        displayMessage(error.message, 'error');
+      } else {
+        displayMessage('Correo de recuperación enviado', 'success');
+        resetModal.classList.add('hidden');
+      }
+    });
+  </script>
+
+</body>
+</html>

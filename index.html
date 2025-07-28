@@ -3,369 +3,442 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>El rincon mágico-Iniciar Sesión</title>
+    <title>El rincón mágico</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
     <style>
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #f8f8f8; /* Fondo ligeramente gris */
+            background-color: #ededed;
         }
-        /* Estilos para el toggle switch */
-        .toggle-switch {
-            position: relative;
-            display: inline-block;
-            width: 40px;
-            height: 20px;
+        .gradient-yellow {
+            background: linear-gradient(to right, #ffe600, #ffcc00);
         }
-        .toggle-switch input {
-            opacity: 0;
-            width: 0;
-            height: 0;
+        .shadow-custom {
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
         }
-        .slider {
-            position: absolute;
-            cursor: pointer;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: #ccc;
-            -webkit-transition: .4s;
-            transition: .4s;
-            border-radius: 34px;
+        .card-shadow {
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
         }
-        .slider:before {
-            position: absolute;
-            content: "";
-            height: 16px;
-            width: 16px;
-            left: 2px;
-            bottom: 2px;
-            background-color: white;
-            -webkit-transition: .4s;
-            transition: .4s;
+        .carousel-button {
+            background-color: rgba(255, 255, 255, 0.8);
             border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 10;
         }
-        input:checked + .slider {
-            background-color: #FF6B00; /* Naranja para el estado activado */
+        .carousel-button-left {
+            left: 1rem;
         }
-        input:focus + .slider {
-            box-shadow: 0 0 1px #FF6B00;
+        .carousel-button-right {
+            right: 1rem;
         }
-        input:checked + .slider:before {
-            -webkit-transform: translateX(20px);
-            -ms-transform: translateX(20px);
-            transform: translateX(20px);
-        }
-
-        /* --- Estilos para la línea amarilla del header --- */
-        .header-link {
-            position: relative; /* Necesario para posicionar el pseudo-elemento */
-            display: inline-block; /* Asegura que el ancho sea el del texto */
-        }
-
-        .header-link::after {
-            content: ''; /* Contenido vacío para el pseudo-elemento */
-            position: absolute; /* Posicionamiento absoluto respecto al padre */
-            width: 100%; /* Ocupa todo el ancho del enlace */
-            height: 2px; /* Grosor de la línea */
-            bottom: -5px; /* Ajusta la distancia desde el texto */
-            left: 0;
-            background-color: #FF6B00; /* Color amarillo */
-            transform: scaleX(0); /* Inicialmente invisible (ancho 0) */
-            transition: transform 0.3s ease-out; /* Transición suave */
-            transform-origin: left; /* La animación se origina desde la izquierda */
+        .carousel-button svg {
+            width: 20px;
+            height: 20px;
+            color: #333;
         }
 
-        .header-link:hover::after {
-            transform: scaleX(1); /* Al pasar el mouse, la línea se expande */
+        /*animacion de subrayar para botones crear cuenta e iniciar sesion*/
+        .link-underline {
+        position: relative;
+        display: inline-block;
         }
 
+        .link-underline::after {
+        content: '';
+        position: absolute;
+        left: 0;
+        bottom: -2px;
+        width: 0%;
+        height: 2px;
+        background-color: white;
+        transition: width 0.3s ease;
+        }
+
+        .link-underline:hover::after {
+        width: 100%;
+        }
+        @keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-fadeIn {
+  animation: fadeIn 0.5s ease-in-out;
+}
+       
     </style>
 </head>
-<body class="min-h-screen flex flex-col">
+<body class="bg-gray-200">
 
-    <header class="bg-white shadow-sm py-4 px-6 md:px-12 flex justify-between items-center">
-        <div class="text-2xl font-bold text-gray-800">El Rincón Mágico</div>
-        <nav class="hidden md:flex space-x-8 text-gray-600 font-medium">
-            <a href="#" class="hover:text-gray-900 header-link">Inicio</a>
-            <a href="index.html" class="hover:text-gray-900 header-link">Tienda</a>
-            <a href="acerdade.html" class="hover:text-gray-900 header-link">Acerca de nosotros</a>
-            <a href="contacto.html" class="hover:text-gray-900 header-link">Contacto</a>
-        </nav>
-        <div class="flex items-center space-x-6">
+    <!-- Top Bar -->
+    <header class="bg-orange-500 py-2 shadow-md">
+        <div class="container mx-auto px-4 flex items-center justify-between">
+            <!-- Logo and Search Bar -->
+            <div class="flex items-center space-x-4 w-full md:w-auto">
+                <a href="index.html">
+  <img src="logo.png" alt="Rincón mágico Logo" class="h-12">
+</a>
+
+                <div class="relative flex-grow">
+                    <input type="text" placeholder="Buscar navidad, hogar..." 
+                    class="w-full pl-4 pr-10 py-2 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    id="busqueda-input">
+                </div>
+                 
+            </div>
+
+            <!-- User Info and Navigation -->
+            <div id="auth-section" class="hidden md:flex items-center space-x-6 text-sm">
+            <!-- Aquí se rellenará dinámicamente -->
+            </div>
+
         </div>
     </header>
 
-    <main class="flex-grow flex flex-col items-center justify-center p-4">
-        <h1 class="text-3xl md:text-4xl font-semibold text-gray-800 mb-8 mt-4">Inicia sesión</h1>
-
-        <div class="bg-white rounded-2xl shadow-lg flex flex-col lg:flex-row max-w-5xl w-full overflow-hidden">
-            <div class="lg:w-1/2 p-8 flex items-center justify-center bg-white">
-                <img src="login-img.avif" 
-                     alt="Ilustración de una persona en un carrito de compras" 
-                     class="max-w-full h-auto rounded-lg"
-                     onerror="this.onerror=null;this.src='https://placehold.co/500x400/F8F8F8/333333?text=Shopping+Illustration';">
+    <!-- Categories and Location Bar -->
+    <nav class="bg-white py-2 shadow-sm">
+        <div class="container mx-auto px-4 flex items-center justify-between text-gray-700 text-sm">
+            <div class="flex items-center space-x-4">
             </div>
-
-            <div class="lg:w-1/2 p-8 md:p-12 flex flex-col justify-center">
-                <h2 class="text-2xl md:text-3xl font-semibold text-gray-800 mb-6">Bienvenido de vuelta. Por favor, inicia sesión en tu cuenta.</h2>
-
-                <form autocomplete="on" id="loginForm" class="space-y-6">
-  <div>
-    <input 
-      type="email" 
-      name="email" 
-      id="email"
-      placeholder="tucorreo@gmail.com" 
-      class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500" 
-      required
-    >
-  </div>
-
-  <div>
-    <input 
-      type="password" 
-      name="password" 
-      id="password"
-      placeholder="tu contraseña..." 
-      class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500" 
-      required
-    >
-  </div>
-
-  <div class="flex justify-between items-center">
-    <label class="flex items-center space-x-2 cursor-pointer">
-      <div class="toggle-switch">
-        <input type="checkbox" id="rememberPassword">
-        <span class="slider"></span>
-      </div>
-      <span class="text-gray-600 text-sm">Recordar correo</span>
-    </label>
-
-    <a href="#" id="forgotPasswordLink" class="text-red-500 text-sm font-medium hover:underline">
-  ¿Olvidaste tu contraseña?
-</a>
-
-  </div>
-
-  <div class="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
-    <button 
-      type="submit"
-      class="bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 px-6 rounded-lg shadow-md flex-grow transition duration-300 ease-in-out"
-    >
-      Iniciar sesión
-    </button>
-
-    <a href="signup.html" class="flex-grow text-center bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold py-3 px-6 rounded-lg shadow-md transition duration-300 ease-in-out">
-      Crear cuenta
-    </a>
-  </div>
-</form>
-
+            <div class="flex items-center space-x-2">
+                <svg class="h-4 w-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                <span>Envios a Facatativa</span>
             </div>
         </div>
-    </main>
-    <div id="resetModal" class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 hidden">
-  <div class="bg-white p-6 rounded-lg shadow-lg w-80 text-center">
-    <h2 class="text-lg font-semibold mb-2">Restablecer contraseña</h2>
-    <input id="resetEmail" type="email" placeholder="Ingresa tu correo" class="w-full border px-3 py-2 rounded mb-4" />
-    <div class="flex justify-center space-x-2">
-      <button id="sendResetBtn" class="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded">
-        Enviar
-      </button>
-      <button id="cancelResetBtn" class="bg-gray-300 hover:bg-gray-400 text-black px-4 py-2 rounded">
-        Cancelar
-      </button>
+    </nav>
+
+    <!-- Level 6 Promotion Section -->
+    <section class="relative bg-gray-900 text-white py-8 mt-4 overflow-hidden">
+  <div class="carousel-slides relative w-full transition-transform duration-500 ease-in-out flex" style="transform: translateX(0%)">
+    <!-- Slide 1 -->
+    <div class="min-w-full flex flex-col md:flex-row items-center justify-between px-4 md:px-56">
+      <div class="md:w-1/2 text-center md:text-left mb-8 md:mb-0">
+        <h2 class="text-3xl font-bold mb-4">BIENVENIDO</h2>
+        <h3 class="text-xl md:text-2xl font-semibold mb-4">A LA MISCELÁNEA <br> EL RINCÓN MÁGICO</h3>
+        <div class="flex items-center justify-center md:justify-start space-x-6">
+          <div class="flex flex-col items-center">
+            <img src="logo.png" alt="Logo" class="h-10 mb-1">
+            <span class="text-xs">COMPRA PRODUCTOS</span>
+          </div>
+          <div class="flex flex-col items-center">
+            <span class="text-2xl font-bold text-green-400">- $2.000</span>
+            <span class="text-xs">ENVIOS</span>
+          </div>
+          <div class="flex flex-col items-center">
+            <span class="text-xs">HASTA </span>
+            <span class="text-2xl font-bold">$0 EN ENVIOS</span>
+            <span class="text-xs">SI VIVES MUY CERCA</span>
+          </div>
+        </div>
+        <p class="text-xs text-gray-400 mt-4">Al comprar aceptas los términos y condiciones.</p>
+      </div>
+      <div class="md:w-1/2 relative flex justify-center items-center">
+        <img src="slide1.png" alt="Promotion Image" class="w-full max-w-md rounded-lg shadow-lg">
+        <div class="absolute inset-0 bg-gradient-to-l from-transparent to-gray-900 opacity-70 rounded-lg"></div>
+      </div>
+    </div>
+
+    <!-- Slide 2 -->
+    <div class="min-w-full flex flex-col md:flex-row items-center justify-between px-4 md:px-56">
+      <div class="md:w-1/2 text-center md:text-left mb-8 md:mb-0">
+        <h2 class="text-3xl font-bold mb-4">OFERTAS ESPECIALES</h2>
+        <h3 class="text-xl md:text-2xl font-semibold mb-4">POR APERTURA<br>DESCUENTOS INCREÍBLES</h3>
+        <p class="text-gray-300">Aprovecha y haz tu compra ahora mismo, porque mañana puede ser tarde.</p>
+      </div>
+      <div class="md:w-1/2 relative flex justify-center items-center">
+        <img src="slide2.gif" alt="Promo 2" class="w-full max-w-md rounded-lg shadow-lg">
+        <div class="absolute inset-0 bg-gradient-to-l from-transparent to-gray-900 opacity-70 rounded-lg"></div>
+      </div>
     </div>
   </div>
+
+  <!-- Navigation Dots -->
+  <div class="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2">
+    <span class="dot w-3 h-3 bg-white rounded-full cursor-pointer transition-all"></span>
+    <span class="dot w-3 h-3 bg-gray-600 rounded-full cursor-pointer transition-all"></span>
+  </div>
+
+  <!-- Arrows -->
+  <button class="carousel-button-left absolute top-1/2 left-4 transform -translate-y-1/2 z-10 bg-white/20 hover:bg-white/40 p-2 rounded-full">
+    <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+    </svg>
+  </button>
+
+  <button class="carousel-button-right absolute top-1/2 right-4 transform -translate-y-1/2 z-10 bg-white/20 hover:bg-white/40 p-2 rounded-full">
+    <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+    </svg>
+  </button>
+</section>
+
+
+    <!-- Product Sections -->
+    <main class="container mx-auto px-4 py-8">
+  <h2 class="text-2xl font-bold text-gray-800 mb-6">Productos destacados</h2>
+  <div id="productos-container" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+    <!-- Aquí se insertarán los productos dinámicamente -->
+  </div>
+</main>
+<!-- Toast de notificación -->
+<div id="toast" class="fixed bottom-4 right-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg opacity-0 pointer-events-none transition-opacity duration-300 z-50">
+  Producto agregado al carrito
 </div>
 
-    <script>
-    // Configuración de Supabase
-    const SUPABASE_URL = 'https://bzeoxurommikbjbbbcfl.supabase.co';
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ6ZW94dXJvbW1pa2JqYmJiY2ZsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTM1ODYwNTUsImV4cCI6MjA2OTE2MjA1NX0.19Xh5DJh49bvODOKVDBMgFBfJ1g9KIwE00BP_j7Y9VQ';
+<script>
+  const slides = document.querySelector('.carousel-slides');
+  const dots = document.querySelectorAll('.dot');
+  let currentIndex = 0;
 
-    const { createClient } = supabase;
-    const client = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-    // Obtener campos
-    const emailInput = document.querySelector('input[type="email"]');
-    const passwordInput = document.querySelector('input[type="password"]');
-    const loginButton = document.querySelector('button'); // El primero es "Iniciar sesión"
-
-    // Crear div de mensaje si no existe
-    let messageDiv = document.getElementById('message');
-    if (!messageDiv) {
-        messageDiv = document.createElement('div');
-        messageDiv.id = 'message';
-        messageDiv.className = 'mb-4 text-center text-sm font-medium';
-        loginButton.parentElement.insertBefore(messageDiv, loginButton);
-    }
-
-    // Función para mostrar mensajes
-    function displayMessage(text, type) {
-        messageDiv.textContent = text;
-        if (type === 'success') {
-            messageDiv.className = 'mb-4 text-center text-sm font-medium text-green-600';
-        } else if (type === 'error') {
-            messageDiv.className = 'mb-4 text-center text-sm font-medium text-red-600';
-        } else {
-            messageDiv.className = 'mb-4 text-center text-sm font-medium text-gray-700';
-        }
-    }
-
-    // Manejar el evento de inicio de sesión
-    loginButton.addEventListener('click', async (event) => {
-        event.preventDefault();
-
-        const email = emailInput.value;
-        const password = passwordInput.value;
-
-        if (!email || !password) {
-            displayMessage('Por favor, completa los campos de correo y contraseña.', 'error');
-            return;
-        }
-
-        displayMessage('Iniciando sesión...', 'info');
-        loginButton.disabled = true;
-
-        try {
-            const { data, error } = await client.auth.signInWithPassword({
-                email,
-                password
-            });
-
-            if (error) {
-                displayMessage(`Error al iniciar sesión: ${error.message}`, 'error');
-            } else {
-                displayMessage('¡Inicio de sesión exitoso! Redirigiendo...', 'success');
-                setTimeout(() => {
-                    window.location.href = 'index.html'; // Redirigir a la tienda o inicio
-                }, 2000);
-            }
-        } catch (err) {
-            displayMessage(`Error inesperado: ${err.message}`, 'error');
-        } finally {
-            loginButton.disabled = false;
-        }
+  function updateCarousel(index) {
+    slides.style.transform = `translateX(-${index * 100}%)`;
+    dots.forEach((dot, i) => {
+      dot.classList.toggle('bg-white', i === index);
+      dot.classList.toggle('bg-gray-600', i !== index);
     });
+  }
 
+  document.querySelector('.carousel-button-left').addEventListener('click', () => {
+    currentIndex = (currentIndex === 0) ? 1 : 0;
+    updateCarousel(currentIndex);
+  });
 
+  document.querySelector('.carousel-button-right').addEventListener('click', () => {
+    currentIndex = (currentIndex === 1) ? 0 : 1;
+    updateCarousel(currentIndex);
+  });
 
-    // Elemento del checkbox y del email
-const rememberCheckbox = document.getElementById('rememberPassword');
+  dots.forEach((dot, i) => {
+    dot.addEventListener('click', () => {
+      currentIndex = i;
+      updateCarousel(currentIndex);
+    });
+  });
 
-// Al cargar la página, si hay un correo guardado, lo insertamos
-document.addEventListener('DOMContentLoaded', () => {
-    const savedEmail = localStorage.getItem('savedEmail');
-    if (savedEmail) {
-        emailInput.value = savedEmail;
-        rememberCheckbox.checked = true;
-    }
-});
+  const supabaseUrl = 'https://bzeoxurommikbjbbbcfl.supabase.co';
+  const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ6ZW94dXJvbW1pa2JqYmJiY2ZsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTM1ODYwNTUsImV4cCI6MjA2OTE2MjA1NX0.19Xh5DJh49bvODOKVDBMgFBfJ1g9KIwE00BP_j7Y9VQ'; // Reemplaza esto con tu clave pública de Supabase
+  const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
 
-// Cuando cambia el checkbox, actualizamos localStorage
-rememberCheckbox.addEventListener('change', () => {
-    if (rememberCheckbox.checked && emailInput.value) {
-        localStorage.setItem('savedEmail', emailInput.value);
-    } else {
-        localStorage.removeItem('savedEmail');
-    }
-});
+  async function cargarProductos() {
+  const { data: productos, error } = await supabase
+    .from('productos')
+    .select('name, price, description, category, imagen');
 
-// También actualizamos al hacer login exitoso
-loginButton.addEventListener('click', async (event) => {
-    event.preventDefault();
-
-    const email = emailInput.value;
-    const password = passwordInput.value;
-
-    if (!email || !password) {
-        displayMessage('Por favor, completa los campos de correo y contraseña.', 'error');
-        return;
-    }
-
-    displayMessage('Iniciando sesión...', 'info');
-    loginButton.disabled = true;
-
-    try {
-        const { data, error } = await client.auth.signInWithPassword({
-            email,
-            password
-        });
-
-        if (error) {
-            displayMessage(`Error al iniciar sesión: ${error.message}`, 'error');
-        } else {
-            if (rememberCheckbox.checked) {
-                localStorage.setItem('savedEmail', email);
-            } else {
-                localStorage.removeItem('savedEmail');
-            }
-            displayMessage('¡Inicio de sesión exitoso! Redirigiendo...', 'success');
-            setTimeout(() => {
-                window.location.href = 'index.html';
-            }, 2000);
-        }
-    } catch (err) {
-        displayMessage(`Error inesperado: ${err.message}`, 'error');
-    } finally {
-        loginButton.disabled = false;
-    }
-});
-
-
-
-
-
-
-
-
-
-
-
-const forgotPasswordLink = document.getElementById('forgotPasswordLink');
-const resetModal = document.getElementById('resetModal');
-const resetEmail = document.getElementById('resetEmail');
-const sendResetBtn = document.getElementById('sendResetBtn');
-const cancelResetBtn = document.getElementById('cancelResetBtn');
-
-forgotPasswordLink.addEventListener('click', (e) => {
-  e.preventDefault();
-  resetEmail.value = emailInput.value || '';
-  resetModal.classList.remove('hidden');
-});
-
-cancelResetBtn.addEventListener('click', () => {
-  resetModal.classList.add('hidden');
-});
-
-sendResetBtn.addEventListener('click', async () => {
-  const email = resetEmail.value.trim();
-
-  if (!email) {
-    displayMessage('Por favor ingresa un correo válido.', 'error');
+  if (error) {
+    console.error('Error al obtener productos:', error.message);
     return;
   }
 
-  try {
-    const { data, error } = await client.auth.resetPasswordForEmail(email, {
-      redirectTo: 'https://el-rincon-magico.vercel.app/resetpassword.html' // cámbialo por tu URL real
+  const contenedor = document.getElementById('productos-container');
+  contenedor.innerHTML = ''; // Limpiar antes de insertar
+
+  productos.forEach(producto => {
+  const card = document.createElement('div');
+  card.className = 'bg-white rounded-lg p-4 card-shadow text-center';
+
+  card.innerHTML = `
+    <img src="${producto.imagen}" alt="${producto.name}" class="w-full h-48 object-cover rounded-md mb-3">
+    <h3 class="text-lg font-semibold text-gray-800 mb-1">${producto.name}</h3>
+    <p class="text-sm text-gray-500 mb-2">${producto.description}</p>
+    <p class="text-xl font-bold text-orange-600 mb-1">$${Number(producto.price).toLocaleString()}</p>
+    <p class="text-xs text-gray-400 mb-3">${producto.category}</p>
+  `;
+
+  const boton = document.createElement('button');
+  boton.textContent = 'Agregar al carrito';
+  boton.className = 'agregar-carrito bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600 transition';
+  boton.addEventListener('click', () => {
+    agregarAlCarrito(producto);
+  });
+
+  const verDetalles = document.createElement('a');
+  verDetalles.textContent = 'Ver detalles';
+  verDetalles.href = 'detalles.html';
+  verDetalles.className = 'inline-block mt-3 ml-2 text-sm text-blue-600 hover:underline';
+  verDetalles.addEventListener('click', () => {
+    localStorage.setItem('productoDetalle', JSON.stringify(producto));
+  });
+
+  card.appendChild(boton);
+  card.appendChild(verDetalles);
+  contenedor.appendChild(card);
+});
+
+}
+
+
+  cargarProductos();
+
+  // === AUTENTICACIÓN Y VISIBILIDAD DEL USUARIO ===
+const authSection = document.getElementById("auth-section");
+
+async function verificarSesion() {
+  const { data: { session }, error } = await supabase.auth.getSession();
+
+  if (error) {
+    console.error('Error obteniendo sesión:', error.message);
+    return;
+  }
+
+  if (session?.user) {
+    const email = session.user.email;
+    const direccion = session.user.user_metadata?.address || "Sin dirección";
+
+    authSection.innerHTML = `
+  <div class="flex items-center justify-end text-white text-sm space-x-4">
+    <span>${email}</span>
+    <span class="text-xs text-gray-200">${direccion}</span>
+    <button onclick="cerrarSesion()" class="text-white link-underline">Cerrar sesión</button>
+  </div>
+  <a href="carrito.html" title="Carrito">
+    <svg class="h-6 w-6 text-white hover:text-yellow-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+        d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+    </svg>
+  </a>
+`;
+
+  } else {
+    authSection.innerHTML = `
+      <a href="signup.html" class="text-black hover:text-white link-underline">Crea tu cuenta</a>
+      <a href="sigin.html" class="text-black hover:text-white link-underline">Ingresa</a>
+      <a href="carrito.html" title="Carrito">
+        <svg class="h-6 w-6 text-white hover:text-yellow-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+        </svg>
+      </a>
+    `;
+  }
+}
+
+
+// Función para cerrar sesión
+async function cerrarSesion() {
+  await supabase.auth.signOut();
+  window.location.href = "sigin.html";
+}
+
+verificarSesion();
+
+// Función para buscar productos por nombre o categoría
+async function buscarProductos(query) {
+  const { data: productos, error } = await supabase
+    .from('productos')
+    .select('name, price, description, category, imagen');
+
+  if (error) {
+    console.error('Error buscando productos:', error.message);
+    return;
+  }
+
+  const filtrados = productos.filter(p =>
+    p.name.toLowerCase().includes(query.toLowerCase()) ||
+    p.category.toLowerCase().includes(query.toLowerCase())
+  );
+
+  const contenedor = document.getElementById('productos-container');
+  contenedor.innerHTML = '';
+
+  if (filtrados.length === 0) {
+    const mensaje = document.createElement('div');
+    mensaje.innerHTML = `
+      <div class="w-full flex justify-center items-center py-24">
+        <p class="text-black text-2xl font-semibold text-center animate-fadeIn w-full max-w-xl">
+          Oops, aún no vendemos ese producto...
+        </p>
+      </div>
+    `;
+    contenedor.classList.remove('grid');
+    contenedor.classList.add('flex', 'justify-center');
+    contenedor.appendChild(mensaje);
+    return;
+  }
+
+  contenedor.classList.add('grid');
+  contenedor.classList.remove('flex', 'justify-center');
+
+  filtrados.forEach(producto => {
+    const card = document.createElement('div');
+    card.className = 'bg-white rounded-lg p-4 card-shadow text-center flex flex-col items-center';
+
+    card.innerHTML = `
+      <img src="${producto.imagen}" alt="${producto.name}" class="w-full h-48 object-cover rounded-md mb-3">
+      <h3 class="text-lg font-semibold text-gray-800 mb-1">${producto.name}</h3>
+      <p class="text-sm text-gray-500 mb-2">${producto.description}</p>
+      <p class="text-xl font-bold text-orange-600 mb-1">$${Number(producto.price).toLocaleString()}</p>
+      <p class="text-xs text-gray-400 mb-3">${producto.category}</p>
+    `;
+
+    // Botón "Agregar al carrito"
+    const botonAgregar = document.createElement('button');
+    botonAgregar.textContent = 'Agregar al carrito';
+    botonAgregar.className = 'bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600 transition mb-2';
+    botonAgregar.addEventListener('click', () => {
+      agregarAlCarrito(producto);
     });
 
-    if (error) {
-      displayMessage(`Error: ${error.message}`, 'error');
-    } else {
-      displayMessage('Correo enviado. Revisa tu bandeja de entrada.', 'success');
-      resetModal.classList.add('hidden');
-    }
-  } catch (err) {
-    displayMessage('Ocurrió un error inesperado.', 'error');
+    // Botón "Ver detalles"
+    const botonVer = document.createElement('button');
+    botonVer.textContent = 'Ver detalles';
+    botonVer.className = 'bg-gray-100 text-gray-800 px-4 py-2 rounded hover:bg-gray-200 transition';
+    botonVer.addEventListener('click', () => {
+      localStorage.setItem('productoDetalle', JSON.stringify(producto));
+      window.location.href = 'detalles.html';
+    });
+
+    card.appendChild(botonAgregar);
+    card.appendChild(botonVer);
+    contenedor.appendChild(card);
+  });
+}
+
+
+
+// Escuchar evento de Enter o clic en el ícono
+const inputBusqueda = document.getElementById('busqueda-input');
+
+inputBusqueda.addEventListener('keydown', e => {
+  if (e.key === 'Enter') {
+    buscarProductos(inputBusqueda.value);
   }
 });
+
+function agregarAlCarrito(producto) {
+  let carrito = JSON.parse(localStorage.getItem('carrito')) || [];
+  const existente = carrito.find(p => p.name === producto.name);
+
+  if (existente) {
+    existente.cantidad += 1;
+  } else {
+    carrito.push({ ...producto, cantidad: 1 });
+  }
+
+  localStorage.setItem('carrito', JSON.stringify(carrito));
+  mostrarToast(`"${producto.name}" fue agregado al carrito`);
+}
+function mostrarToast(mensaje) {
+  const toast = document.getElementById('toast');
+  toast.textContent = mensaje;
+  toast.classList.remove('opacity-0');
+  toast.classList.add('opacity-100');
+
+  setTimeout(() => {
+    toast.classList.remove('opacity-100');
+    toast.classList.add('opacity-0');
+  }, 2500); // se oculta después de 2.5 segundos
+}
+
 
 </script>
 

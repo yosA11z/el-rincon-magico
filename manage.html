@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Admin - Rincón Mágico</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .toast {
+      position: fixed;
+      bottom: 1rem;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #FF6B00;
+      color: white;
+      padding: 12px 20px;
+      border-radius: 8px;
+      font-weight: 600;
+      z-index: 50;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+    .toast.show {
+      opacity: 1;
+    }
+  </style>
+</head>
+<body class="relative bg-[#fffaf5] text-[#333] min-h-screen p-6">
+    <button onclick="cerrarSesion()" 
+  class="absolute top-6 right-6 bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600 transition z-50">
+  Cerrar sesión
+</button>
+
+
+  <h1 class="text-3xl font-bold text-center text-[#FF6B00] mb-6">Panel de Administración</h1>
+
+
+  <form id="addProductForm" class="max-w-xl mx-auto bg-white p-6 rounded shadow space-y-4">
+    <h2 class="text-xl font-semibold text-center mb-4">Agregar producto</h2>
+    <input id="name" type="text" placeholder="Nombre del producto" required class="w-full border p-2 rounded">
+    
+    <select id="category" required class="w-full border p-2 rounded">
+      <option value="" disabled selected>Selecciona una categoría</option>
+      <option value="Juguetes">Juguetes</option>
+      <option value="Papelería">Papelería</option>
+      <option value="Decoración">Decoración</option>
+      <option value="Hogar">Hogar</option>
+      <option value="Hogar">Navidad</option>
+    </select>
+
+    <input id="price" type="number" placeholder="Precio" required class="w-full border p-2 rounded">
+    <input id="image" type="file" accept="image/*" required class="w-full border p-2 rounded bg-white">
+    <textarea id="description" placeholder="Descripción" required class="w-full border p-2 rounded"></textarea>
+    <button type="submit" class="w-full bg-[#FF6B00] text-white py-2 rounded hover:bg-orange-600 transition">Agregar</button>
+  </form>
+
+  <div id="productList" class="max-w-4xl mx-auto mt-8 grid md:grid-cols-3 gap-4"></div>
+
+  <!-- Modal para editar -->
+  <div id="editModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
+    <div class="bg-white p-6 rounded w-full max-w-md space-y-4">
+      <h2 class="text-xl font-bold text-center">Editar producto</h2>
+      <input id="editName" type="text" class="w-full border p-2 rounded">
+      <select id="editCategory" class="w-full border p-2 rounded">
+        <option value="Juguetes">Juguetes</option>
+        <option value="Papelería">Papelería</option>
+        <option value="Decoración">Decoración</option>
+        <option value="Hogar">Hogar</option>
+      </select>
+      <input id="editPrice" type="number" class="w-full border p-2 rounded">
+      <textarea id="editDescription" class="w-full border p-2 rounded"></textarea>
+      <button id="saveEdit" class="bg-[#FF6B00] text-white w-full py-2 rounded">Guardar cambios</button>
+      <button onclick="cerrarModal()" class="text-center w-full text-sm text-gray-500 mt-2">Cancelar</button>
+    </div>
+  </div>
+
+  <div id="toast" class="toast"></div>
+
+  <!-- solo parte modificada en el <script> -->
+<script>
+  const SUPABASE_URL = 'https://bzeoxurommikbjbbbcfl.supabase.co';
+  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ6ZW94dXJvbW1pa2JqYmJiY2ZsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTM1ODYwNTUsImV4cCI6MjA2OTE2MjA1NX0.19Xh5DJh49bvODOKVDBMgFBfJ1g9KIwE00BP_j7Y9VQ'; // tu clave pública
+  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+  const CLOUDINARY_URL = 'https://api.cloudinary.com/v1_1/dtorzrauc/image/upload';
+  const CLOUDINARY_UPLOAD_PRESET = 'anon_upload'; // tu preset público
+
+  const form = document.getElementById('addProductForm');
+  const productList = document.getElementById('productList');
+  let editId = null;
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const name = document.getElementById('name').value;
+    const category = document.getElementById('category').value;
+    const price = parseFloat(document.getElementById('price').value);
+    const description = document.getElementById('description').value;
+    const imageFile = document.getElementById('image').files[0];
+
+    if (!imageFile) return mostrarToast("Selecciona una imagen");
+
+    const formData = new FormData();
+    formData.append('file', imageFile);
+    formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+
+    const res = await fetch(CLOUDINARY_URL, {
+      method: 'POST',
+      body: formData
+    });
+
+    const data = await res.json();
+    const imageUrl = data.secure_url;
+
+    if (!imageUrl) return mostrarToast("Error al subir imagen");
+
+    const { error } = await supabase
+  .from('productos')
+  .insert([
+    {
+      name: name,
+      category: category,
+      price: price,
+      description: description,
+      imagen: imageUrl // 👈 Aquí se guarda la URL de Cloudinary
+    }
+  ]);
+
+if (error) {
+  console.error("❌ Error al insertar:", error);
+  alert("Hubo un error al guardar el producto.");
+} else {
+  alert("✅ Producto agregado correctamente.");
+  window.location.reload();
+}
+  });
+
+
+  async function cargarProductos() {
+    const { data, error } = await supabase.from('productos').select('*').order('id', { ascending: false });
+    if (error) return mostrarToast("Error al cargar productos");
+
+    productList.innerHTML = '';
+    data.forEach(p => {
+      productList.innerHTML += `
+        <div class="border rounded p-4 bg-white shadow space-y-2">
+          <img src="${p.imagen}" class="w-full h-40 object-cover rounded" />
+          <h3 class="font-bold">${p.name}</h3>
+          <p>${p.description}</p>
+          <p class="text-sm text-gray-500">${p.category} - $${p.price}</p>
+          <div class="flex gap-2">
+            <button onclick="editarProducto(${p.id}, '${p.name}', '${p.category}', ${p.price}, \`${p.description}\`)" class="bg-yellow-400 px-2 py-1 rounded">Editar</button>
+            <button onclick="eliminarProducto(${p.id})" class="bg-red-500 text-white px-2 py-1 rounded">Eliminar</button>
+          </div>
+        </div>`;
+    });
+  }
+
+  async function eliminarProducto(id) {
+    const { error } = await supabase.from('productos').delete().eq('id', id);
+    if (error) return mostrarToast("Error al eliminar");
+    mostrarToast("🗑️ Eliminado");
+    cargarProductos();
+  }
+
+  function editarProducto(id, nombre, categoria, precio, descripcion) {
+    editId = id;
+    document.getElementById('editName').value = nombre;
+    document.getElementById('editCategory').value = categoria;
+    document.getElementById('editPrice').value = precio;
+    document.getElementById('editDescription').value = descripcion;
+    document.getElementById('editModal').classList.remove('hidden');
+  }
+
+  document.getElementById('saveEdit').addEventListener('click', async () => {
+    const nombre = document.getElementById('editName').value;
+    const categoria = document.getElementById('editCategory').value;
+    const precio = parseFloat(document.getElementById('editPrice').value);
+    const descripcion = document.getElementById('editDescription').value;
+
+    const { error } = await supabase
+  .from('productos')
+  .update({
+    name: nombre,
+    category: categoria,
+    price: precio,
+    description: descripcion
+  })
+  .eq('id', editId);
+
+
+    if (error) return mostrarToast("Error al editar");
+    mostrarToast("✏️ Editado correctamente");
+    cerrarModal();
+    cargarProductos();
+  });
+
+  function cerrarModal() {
+    document.getElementById('editModal').classList.add('hidden');
+  }
+
+  function mostrarToast(mensaje) {
+    const toast = document.getElementById("toast");
+    toast.innerText = mensaje;
+    toast.classList.add("show");
+    setTimeout(() => toast.classList.remove("show"), 3000);
+  }
+
+  cargarProductos();
+
+
+
+
+
+
+
+
+  async function cerrarSesion() {
+  const { error } = await supabase.auth.signOut();
+  if (error) {
+    mostrarToast("Error al cerrar sesión");
+  } else {
+    mostrarToast("Sesión cerrada");
+    // Redirige al usuario a la página de login u otra que elijas
+    setTimeout(() => {
+      window.location.href = "admin-login.html"; // reemplaza por tu ruta real
+    }, 1500);
+  }
+}
+
+</script>
+
+</body>
+</html>
