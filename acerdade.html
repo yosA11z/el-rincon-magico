@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Acerca de Nosotros | El Rincón Mágico</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #f3f4f6;
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .fade-in-up {
+      animation: fadeInUp 0.6s ease-out forwards;
+    }
+  </style>
+</head>
+<body class="bg-gray-100 text-gray-800">
+
+  <!-- Header -->
+  <header class="bg-orange-500 py-4 shadow-md">
+    <div class="container mx-auto px-4 flex justify-between items-center">
+      <a href="index.html" class="flex items-center space-x-3">
+        <img src="logo.png" alt="Logo" class="h-10">
+        <span class="text-white font-bold text-lg">El Rincón Mágico</span>
+      </a>
+      <nav class="space-x-4 text-sm text-white">
+        <a href="index.html" class="hover:underline">Inicio</a>
+        <a href="acercadenosotros.html" class="hover:underline font-semibold underline">Nosotros</a>
+        <a href="carrito.html" class="hover:underline">Carrito</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Sección principal -->
+  <section class="container mx-auto px-4 py-12">
+    <div class="text-center mb-10 fade-in-up">
+      <h1 class="text-4xl font-bold text-orange-600 mb-2">Acerca de Nosotros</h1>
+      <p class="text-gray-600 text-lg max-w-2xl mx-auto">Descubre quiénes somos y qué nos inspira a hacer de tu hogar un lugar mágico.</p>
+    </div>
+
+    <div class="grid md:grid-cols-2 gap-10 items-center fade-in-up">
+      <div>
+        <img src="sobre-nosotros.png" alt="Nuestra tienda" class="rounded-lg shadow-lg w-full object-cover">
+      </div>
+      <div>
+        <h2 class="text-2xl font-semibold mb-4">Nuestra Historia</h2>
+        <p class="text-gray-700 leading-relaxed">
+          En <strong>El Rincón Mágico</strong>, nacimos con la idea de traer alegría, color y calidez a cada rincón del hogar. Somos una tienda local de Facatativá con pasión por los detalles y los productos únicos que hacen la diferencia.
+        </p>
+        <p class="text-gray-700 leading-relaxed mt-4">
+          Desde decoraciones navideñas hasta artículos para el hogar, seleccionamos cuidadosamente cada producto para que encuentres siempre algo especial. Nuestra misión es ser tu lugar favorito para inspirarte, regalar y transformar tu espacio.
+        </p>
+      </div>
+    </div>
+
+    <div class="mt-16 grid md:grid-cols-3 gap-8 fade-in-up">
+      <div class="bg-white p-6 rounded-lg shadow text-center">
+        <h3 class="text-xl font-semibold text-orange-500 mb-2">Misión</h3>
+        <p class="text-gray-600">Brindar productos accesibles, únicos y de calidad para llenar de magia cada hogar colombiano.</p>
+      </div>
+      <div class="bg-white p-6 rounded-lg shadow text-center">
+        <h3 class="text-xl font-semibold text-orange-500 mb-2">Visión</h3>
+        <p class="text-gray-600">Ser reconocidos como la tienda favorita en decoración y regalos en Facatativá y sus alrededores.</p>
+      </div>
+      <div class="bg-white p-6 rounded-lg shadow text-center">
+        <h3 class="text-xl font-semibold text-orange-500 mb-2">Valores</h3>
+        <p class="text-gray-600">Pasión, honestidad, creatividad, servicio y amor por los detalles.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="bg-gray-800 text-white mt-16">
+    <div class="container mx-auto px-6 py-10 grid grid-cols-1 md:grid-cols-3 gap-8">
+      <div>
+        <h3 class="text-lg font-bold mb-2">El Rincón Mágico</h3>
+        <p class="text-sm text-gray-400">Tu tienda de confianza en Facatativá. Decoración, hogar y mucho más.</p>
+        <p class="text-xs text-gray-500 mt-4">&copy; 2025 Todos los derechos reservados.</p>
+      </div>
+      <div>
+        <h4 class="text-md font-semibold mb-2">Navegación</h4>
+        <ul class="space-y-1 text-sm">
+          <li><a href="index.html" class="hover:underline hover:text-yellow-400">Inicio</a></li>
+          <li><a href="carrito.html" class="hover:underline hover:text-yellow-400">Carrito</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4 class="text-md font-semibold mb-2">Contáctanos</h4>
+        <p class="text-sm text-gray-400">📍 Facatativá, Colombia</p>
+        <p class="text-sm text-gray-400">📞 +57 313 3420339 </p>
+        <p class="text-sm text-gray-400">📧 contacto@rinconmagico.com</p>
+      </div>
+    </div>
+  </footer>
+</body>
+</html>

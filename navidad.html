@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>El Rincón Mágico de Navidad</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f7f7f7; /* Un gris más claro para el fondo */
+        }
+        /* Colores navideños */
+        .bg-christmas-red { background-color: #B00020; } /* Rojo oscuro */
+        .bg-christmas-green { background-color: #006400; } /* Verde oscuro */
+        .text-christmas-gold { color: #FFD700; } /* Dorado */
+        .bg-christmas-gold-light { background-color: #FFEB3B; } /* Dorado claro */
+        .hover-christmas-gold:hover { color: #FFD700; }
+
+        .shadow-custom {
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+        }
+        .card-shadow {
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+        }
+        .carousel-button {
+            background-color: rgba(255, 255, 255, 0.8);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 10;
+        }
+        .carousel-button-left {
+            left: 1rem;
+        }
+        .carousel-button-right {
+            right: 1rem;
+        }
+        .carousel-button svg {
+            width: 20px;
+            height: 20px;
+            color: #333;
+        }
+
+        /*animacion de subrayar para botones crear cuenta e iniciar sesion*/
+        .link-underline {
+            position: relative;
+            display: inline-block;
+        }
+
+        .link-underline::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: -2px;
+            width: 0%;
+            height: 2px;
+            background-color: white;
+            transition: width 0.3s ease;
+        }
+
+        .link-underline:hover::after {
+            width: 100%;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fadeIn {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+
+    <!-- Top Bar -->
+    <header class="bg-christmas-red py-2 shadow-md">
+        <div class="container mx-auto px-4 flex items-center justify-between">
+            <!-- Logo and Search Bar -->
+            <div class="flex items-center space-x-4 w-full md:w-auto">
+                <a href="index.html">
+                    <!-- Asegúrate de que 'logo-navidad.png' sea tu logo navideño -->
+                    <img src="logo.png" alt="El Rincón Mágico de Navidad Logo" class="h-12">
+                </a>
+
+                <div class="relative flex-grow">
+                    <input type="text" placeholder="Buscar decoración, regalos..."
+                    class="w-full pl-4 pr-10 py-2 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-christmas-gold"
+                    id="busqueda-input">
+                    <!-- Icono de búsqueda -->
+                    <svg class="absolute right-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                </div>
+
+            </div>
+
+            <!-- User Info and Navigation -->
+            <div id="auth-section" class="hidden md:flex items-center space-x-6 text-sm text-white">
+                <!-- Aquí se rellenará dinámicamente -->
+            </div>
+
+        </div>
+    </header>
+
+    <!-- Categories and Location Bar -->
+    <nav class="bg-christmas-green py-2 shadow-sm">
+        <div class="container mx-auto px-4 flex items-center justify-between text-white text-sm">
+            <div class="flex items-center space-x-4">
+                <!-- Puedes añadir más categorías navideñas aquí si lo deseas -->
+            </div>
+            <div class="w-full flex justify-start items-center space-x-2">
+                <a href="index.html" class="font-bold text-christmas-gold hover:underline">Tienda principal</a>
+            </div>
+
+            <div class="flex items-center space-x-2">
+                <svg class="h-4 w-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                <span>Envios a Facatativa</span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Christmas Promotion Section -->
+    <section class="relative bg-red-900 text-white py-8 mt-4 overflow-hidden">
+        <div class="carousel-slides relative w-full transition-transform duration-500 ease-in-out flex" style="transform: translateX(0%)">
+            <!-- Slide 1 -->
+            <div class="min-w-full flex flex-col md:flex-row items-center justify-between px-4 md:px-56">
+                <div class="md:w-1/2 text-center md:text-left mb-8 md:mb-0">
+                    <h2 class="text-3xl font-bold mb-4 text-christmas-gold">¡FELIZ NAVIDAD!</h2>
+                    <h3 class="text-xl md:text-2xl font-semibold mb-4">DESCUBRE LA MAGIA <br> EN CADA REGALO</h3>
+                    <div class="flex items-center justify-center md:justify-start space-x-6">
+                        <div class="flex flex-col items-center">
+                            <!-- Asegúrate de que 'logo-navidad.png' sea tu logo navideño -->
+                            <img src="logo.png" alt="Logo Navidad" class="h-10 mb-1">
+                            <span class="text-xs">REGALOS CON AMOR</span>
+                        </div>
+                        <div class="flex flex-col items-center">
+                            <span class="text-2xl font-bold text-christmas-gold">¡NAVIDAD!</span>
+                            <span class="text-xs">NAVIDAD TODO EL AÑO</span>
+                        </div>
+                        <div class="flex flex-col items-center">
+                            <span class="text-xs">HASTA </span>
+                            <span class="text-2xl font-bold text-christmas-gold">$0 EN ENVIOS</span>
+                            <span class="text-xs">SI VIVES MUY CERCA</span>
+                        </div>
+                    </div>
+                    <p class="text-xs text-gray-300 mt-4">Al comprar aceptas los términos y condiciones.</p>
+                </div>
+                <div class="md:w-1/2 relative flex justify-center items-center">
+                    <!-- Reemplaza 'slide1.png' con una imagen navideña -->
+                    <img src="navidad1.webp" alt="Promoción Navidad 1" class="w-full max-w-md rounded-lg shadow-lg">
+                    <div class="absolute inset-0 bg-gradient-to-l from-transparent to-red-900 opacity-70 rounded-lg"></div>
+                </div>
+            </div>
+
+            <!-- Slide 2 -->
+            <div class="min-w-full flex flex-col md:flex-row items-center justify-between px-4 md:px-56">
+                <div class="md:w-1/2 text-center md:text-left mb-8 md:mb-0">
+                    <h2 class="text-3xl font-bold mb-4 text-christmas-gold">OFERTAS FESTIVAS</h2>
+                    <h3 class="text-xl md:text-2xl font-semibold mb-4">DESCUENTOS MÁGICOS<br>PARA ESTA NAVIDAD</h3>
+                    <p class="text-gray-300">Aprovecha y haz tu compra ahora mismo, ¡la magia no espera!</p>
+                </div>
+                <div class="md:w-1/2 relative flex justify-center items-center">
+                    <!-- Reemplaza 'slide2.gif' con una imagen navideña -->
+                    <img src="navidad22.png" alt="Promoción Navidad 2" class="w-full max-w-md rounded-lg shadow-lg">
+                    <div class="absolute inset-0 bg-gradient-to-l from-transparent to-red-900 opacity-70 rounded-lg"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation Dots -->
+        <div class="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2">
+            <span class="dot w-3 h-3 bg-white rounded-full cursor-pointer transition-all"></span>
+            <span class="dot w-3 h-3 bg-gray-600 rounded-full cursor-pointer transition-all"></span>
+        </div>
+
+        <!-- Arrows -->
+        <button class="carousel-button-left absolute top-1/2 left-4 transform -translate-y-1/2 z-10 bg-white/20 hover:bg-white/40 p-2 rounded-full">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+            </svg>
+        </button>
+
+        <button class="carousel-button-right absolute top-1/2 right-4 transform -translate-y-1/2 z-10 bg-white/20 hover:bg-white/40 p-2 rounded-full">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+            </svg>
+        </button>
+    </section>
+
+    <!-- Product Sections -->
+    <main class="container mx-auto px-4 py-8">
+        <h2 class="text-2xl font-bold text-gray-800 mb-6">Regalos y Decoración Navideña</h2>
+        <div id="productos-container" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            <!-- Aquí se insertarán los productos dinámicamente -->
+        </div>
+    </main>
+    <!-- Toast de notificación -->
+    <div id="toast" class="fixed bottom-4 right-4 bg-green-600 text-white px-4 py-2 rounded-lg shadow-lg opacity-0 pointer-events-none transition-opacity duration-300 z-50">
+        Producto agregado al carrito
+    </div>
+
+<script>
+    const slides = document.querySelector('.carousel-slides');
+    const dots = document.querySelectorAll('.dot');
+    let currentIndex = 0;
+
+    function updateCarousel(index) {
+        slides.style.transform = `translateX(-${index * 100}%)`;
+        dots.forEach((dot, i) => {
+            dot.classList.toggle('bg-white', i === index);
+            dot.classList.toggle('bg-gray-600', i !== index);
+        });
+    }
+
+    document.querySelector('.carousel-button-left').addEventListener('click', () => {
+        currentIndex = (currentIndex === 0) ? 1 : 0;
+        updateCarousel(currentIndex);
+    });
+
+    document.querySelector('.carousel-button-right').addEventListener('click', () => {
+        currentIndex = (currentIndex === 1) ? 0 : 1;
+        updateCarousel(currentIndex);
+    });
+
+    dots.forEach((dot, i) => {
+        dot.addEventListener('click', () => {
+            currentIndex = i;
+            updateCarousel(currentIndex);
+        });
+    });
+
+    const supabaseUrl = 'https://bzeoxurommikbjbbbcfl.supabase.co';
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ6ZW94dXJvbW1pa2JqYmJiY2ZsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTM1ODYwNTUsImV4cCI6MjA2OTE2MjA1NX0.19Xh5DJh49bvODOKVDBMgFBfJ1g9KIwE00BP_j7Y9VQ'; // Reemplaza esto con tu clave pública de Supabase
+    const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+    async function cargarProductos() {
+        const { data: productos, error } = await supabase
+            .from('productos')
+            .select('id, name, price, description, category, imagen')
+            .eq('category', 'Navidad'); // FILTRAR POR CATEGORÍA 'navidad'
+
+        if (error) {
+            console.error('Error al obtener productos:', error.message);
+            return;
+        }
+
+        const contenedor = document.getElementById('productos-container');
+        contenedor.innerHTML = ''; // Limpiar antes de insertar
+
+        if (productos.length === 0) {
+            const mensaje = document.createElement('div');
+            mensaje.innerHTML = `
+                <div class="w-full flex justify-center items-center py-24">
+                    <p class="text-black text-2xl font-semibold text-center animate-fadeIn w-full max-w-xl">
+                        No hay productos de Navidad disponibles en este momento. ¡Vuelve pronto!
+                    </p>
+                </div>
+            `;
+            contenedor.classList.remove('grid');
+            contenedor.classList.add('flex', 'justify-center');
+            contenedor.appendChild(mensaje);
+            return;
+        }
+
+        contenedor.classList.add('grid');
+        contenedor.classList.remove('flex', 'justify-center');
+
+        productos.forEach(producto => {
+            const card = document.createElement('div');
+            card.className = 'bg-white rounded-lg p-4 card-shadow text-center flex flex-col items-center';
+
+            card.innerHTML = `
+                <img src="${producto.imagen}" alt="${producto.name}" class="w-full h-48 object-cover rounded-md mb-3">
+                <h3 class="text-lg font-semibold text-gray-800 mb-1">${producto.name}</h3>
+                <p class="text-sm text-gray-500 mb-2">${producto.description}</p>
+                <p class="text-xl font-bold text-christmas-red mb-1">$${Number(producto.price).toLocaleString()}</p>
+                <p class="text-xs text-gray-400 mb-3">${producto.category}</p>
+            `;
+
+            const boton = document.createElement('button');
+            boton.textContent = 'Agregar al carrito';
+            boton.className = 'agregar-carrito bg-christmas-green text-white px-4 py-2 rounded hover:bg-green-700 transition mb-2';
+            boton.addEventListener('click', () => {
+                agregarAlCarrito(producto);
+            });
+
+            const verDetalles = document.createElement('a');
+            verDetalles.textContent = 'Ver detalles';
+            verDetalles.href = 'detalles.html';
+            verDetalles.className = 'inline-block mt-3 ml-2 text-sm text-blue-600 hover:underline';
+            verDetalles.addEventListener('click', () => {
+                localStorage.setItem('productoDetalle', JSON.stringify(producto));
+            });
+
+            card.appendChild(boton);
+            card.appendChild(verDetalles);
+            contenedor.appendChild(card);
+        });
+    }
+
+    cargarProductos();
+
+    // === AUTENTICACIÓN Y VISIBILIDAD DEL USUARIO ===
+    const authSection = document.getElementById("auth-section");
+
+    async function verificarSesion() {
+        const { data: { session }, error } = await supabase.auth.getSession();
+
+        if (error) {
+            console.error('Error obteniendo sesión:', error.message);
+            return;
+        }
+
+        if (session?.user) {
+            const email = session.user.email;
+            const direccion = session.user.user_metadata?.address || "Sin dirección";
+
+            authSection.innerHTML = `
+                <div class="flex items-center justify-end text-white text-sm space-x-4">
+                    <span>${email}</span>
+                    <span class="text-xs text-gray-200">${direccion}</span>
+                    <button onclick="cerrarSesion()" class="text-white link-underline">Cerrar sesión</button>
+                </div>
+                <a href="carrito.html" title="Carrito">
+                    <!-- Icono de carrito navideño o un regalo SVG -->
+                    <svg class="h-6 w-6 text-white hover-christmas-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                    </svg>
+                </a>
+            `;
+
+        } else {
+            authSection.innerHTML = `
+                <a href="signup.html" class="text-white hover:text-christmas-gold link-underline">Crea tu cuenta</a>
+                <a href="sigin.html" class="text-white hover:text-christmas-gold link-underline">Ingresa</a>
+                <a href="carrito.html" title="Carrito">
+                    <!-- Icono de carrito navideño o un regalo SVG -->
+                    <svg class="h-6 w-6 text-white hover-christmas-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                    </svg>
+                </a>
+            `;
+        }
+    }
+
+    // Función para cerrar sesión
+    async function cerrarSesion() {
+        await supabase.auth.signOut();
+        window.location.href = "sigin.html";
+    }
+
+    verificarSesion();
+
+    // Función para buscar productos por nombre o categoría, SOLO DENTRO DE "navidad"
+    async function buscarProductos(query) {
+        const { data: productos, error } = await supabase
+            .from('productos')
+            .select('name, price, description, category, imagen')
+            .eq('category', 'navidad'); // Mantiene el filtro de categoría
+
+        if (error) {
+            console.error('Error buscando productos:', error.message);
+            return;
+        }
+
+        const filtrados = productos.filter(p =>
+            p.name.toLowerCase().includes(query.toLowerCase()) ||
+            p.description.toLowerCase().includes(query.toLowerCase()) // También buscar en descripción
+        );
+
+        const contenedor = document.getElementById('productos-container');
+        contenedor.innerHTML = '';
+
+        if (filtrados.length === 0) {
+            const mensaje = document.createElement('div');
+            mensaje.innerHTML = `
+                <div class="w-full flex justify-center items-center py-24">
+                    <p class="text-black text-2xl font-semibold text-center animate-fadeIn w-full max-w-xl">
+                        No se encontraron productos de Navidad que coincidan con tu búsqueda.
+                    </p>
+                </div>
+            `;
+            contenedor.classList.remove('grid');
+            contenedor.classList.add('flex', 'justify-center');
+            contenedor.appendChild(mensaje);
+            return;
+        }
+
+        contenedor.classList.add('grid');
+        contenedor.classList.remove('flex', 'justify-center');
+
+        filtrados.forEach(producto => {
+            const card = document.createElement('div');
+            card.className = 'bg-white rounded-lg p-4 card-shadow text-center flex flex-col items-center';
+
+            card.innerHTML = `
+                <img src="${producto.imagen}" alt="${producto.name}" class="w-full h-48 object-cover rounded-md mb-3">
+                <h3 class="text-lg font-semibold text-gray-800 mb-1">${producto.name}</h3>
+                <p class="text-sm text-gray-500 mb-2">${producto.description}</p>
+                <p class="text-xl font-bold text-christmas-red mb-1">$${Number(producto.price).toLocaleString()}</p>
+                <p class="text-xs text-gray-400 mb-3">${producto.category}</p>
+            `;
+
+            // Botón "Agregar al carrito"
+            const botonAgregar = document.createElement('button');
+            botonAgregar.textContent = 'Agregar al carrito';
+            botonAgregar.className = 'bg-christmas-green text-white px-4 py-2 rounded hover:bg-green-700 transition mb-2';
+            botonAgregar.addEventListener('click', () => {
+                agregarAlCarrito(producto);
+            });
+
+            // Botón "Ver detalles"
+            const botonVer = document.createElement('button');
+            botonVer.textContent = 'Ver detalles';
+            botonVer.className = 'bg-gray-100 text-gray-800 px-4 py-2 rounded hover:bg-gray-200 transition';
+            botonVer.addEventListener('click', () => {
+                localStorage.setItem('productoDetalle', JSON.stringify(producto));
+                window.location.href = 'detalles.html';
+            });
+
+            card.appendChild(botonAgregar);
+            card.appendChild(botonVer);
+            contenedor.appendChild(card);
+        });
+    }
+
+    // Escuchar evento de Enter o clic en el ícono
+    const inputBusqueda = document.getElementById('busqueda-input');
+
+    inputBusqueda.addEventListener('keydown', e => {
+        if (e.key === 'Enter') {
+            buscarProductos(inputBusqueda.value);
+        }
+    });
+
+    function agregarAlCarrito(producto) {
+        let carrito = JSON.parse(localStorage.getItem('carrito')) || [];
+        const existente = carrito.find(p => p.name === producto.name);
+
+        if (existente) {
+            existente.cantidad += 1;
+        } else {
+            carrito.push({ ...producto, cantidad: 1 });
+        }
+
+        localStorage.setItem('carrito', JSON.stringify(carrito));
+        mostrarToast(`"${producto.name}" fue agregado al carrito`);
+    }
+
+    function mostrarToast(mensaje) {
+        const toast = document.getElementById('toast');
+        toast.textContent = mensaje;
+        toast.classList.remove('opacity-0');
+        toast.classList.add('opacity-100');
+
+        setTimeout(() => {
+            toast.classList.remove('opacity-100');
+            toast.classList.add('opacity-0');
+        }, 2500); // se oculta después de 2.5 segundos
+    }
+</script>
+<!-- Footer -->
+<footer class="bg-christmas-red text-white mt-16">
+    <div class="container mx-auto px-6 py-10 grid grid-cols-1 md:grid-cols-3 gap-8">
+
+        <!-- Logo y descripción -->
+        <div>
+            <h3 class="text-lg font-bold mb-2">El Rincón Mágico de Navidad</h3>
+            <p class="text-sm text-gray-200">
+                Tu tienda de confianza en Facatativá para la magia navideña.
+            </p>
+            <p class="text-xs text-gray-300 mt-4">&copy; 2025 Todos los derechos reservados.</p>
+        </div>
+
+        <!-- Enlaces rápidos -->
+        <div>
+            <h4 class="text-md font-semibold mb-2">Navegación</h4>
+            <ul class="space-y-1 text-sm">
+                <li><a href="index.html" class="hover:underline hover:text-christmas-gold">Inicio</a></li>
+                <li><a href="carrito.html" class="hover:underline hover:text-christmas-gold">Carrito</a></li>
+                <li><a href="acerdade.html" class="hover:underline hover:text-christmas-gold">Sobre nosotros</a></li>
+            </ul>
+        </div>
+
+        <!-- Contacto -->
+        <div>
+            <h4 class="text-md font-semibold mb-2">Contáctanos</h4>
+            <p class="text-sm text-gray-200">📍 Facatativá, Colombia</p>
+            <p class="text-sm text-gray-200">📞 +57 3133420339</p>
+            <p class="text-sm text-gray-200">📧 contacto@rinconmagico.com</p>
+            <div class="flex space-x-3 mt-3">
+                <!-- Puedes añadir más redes aquí -->
+            </div>
+        </div>
+
+    </div>
+</footer>
+
+</body>
+</html>
